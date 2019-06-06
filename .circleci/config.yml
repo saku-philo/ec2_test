@@ -1,15 +1,58 @@
-# Use the latest 2.1 version of CircleCI pipeline processing engine, see https://circleci.com/docs/2.0/configuration-reference/
-version: 2.1
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/ruby:2.5.5-node-browsers
+        environment:
+          RAILS_ENV: test
+      - image: circleci/postgres:11.2-alpine-postgis
+        # 環境情報を追加
+        environment:
+        - POSTGRES_USER=ubuntu
+        - POSTGRES_DB=myapp_test
+    # ディレクトリ情報を移動（こうしないとエラーになる）
+    working_directory: ~/ec2_test
+    steps:
+      - checkout
 
-# Use a package of configuration called an orb, see https://circleci.com/docs/2.0/orb-intro/
-orbs:
-  # Declare a dependency on the welcome-orb
-  welcome: circleci/welcome-orb@0.3.1
+      # Restore bundle cache
+      - restore_cache:
+          key: rails-demo-{{ checksum "Gemfile.lock" }}
 
-# Orchestrate or schedule a set of jobs, see https://circleci.com/docs/2.0/workflows/
-workflows:
-  # Name the workflow "Welcome"
-  Welcome:
-    # Run the welcome/run job in its own container
-    jobs:
-      - welcome/run
+      # Bundle install dependencies
+      - run: bundle install --path vendor/bundle
+
+      # Store bundle cache
+      - save_cache:
+          key: rails-demo-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
+
+      # Database setup
+      # DBのセットアップを修正
+      - run:
+          name: Database setup
+          command: |
+            bundle exec rake db:create db:schema:load --trace
+            bundle exec rake db:migrate
+          environment:
+            DATABASE_URL: "postgres://ubuntu@localhost:5432/myapp_test"
+
+      # run tests!
+      # RSpecの実行も修正
+      - run:
+          name: run tests
+          command: |
+            mkdir /tmp/test-results
+            TEST_FILES="$(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)"
+            bundle exec rspec --format progress \
+                            --format RspecJunitFormatter \
+                            --out /tmp/test-results/rspec.xml \
+                            --format progress \
+                            "${TEST_FILES}"
+          environment:
+            DATABASE_URL: "postgres://ubuntu@localhost:5432/myapp_test"
+
+      # Save test results for timing analysis
+      - store_test_results:
+          path: test_results
