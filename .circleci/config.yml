@@ -5,6 +5,7 @@ jobs:
       - image: circleci/ruby:2.5.5-node-browsers
         environment:
           RAILS_ENV: test
+          BUNDLER_VERSION: 2.0.1
       - image: circleci/postgres:11.2-alpine-postgis
         # 環境情報を追加
         environment:
