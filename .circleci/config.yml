@@ -5,7 +5,6 @@ jobs:
       - image: circleci/ruby:2.5.5-node-browsers
         environment:
           RAILS_ENV: test
-          BUNDLER_VERSION: 2.0.1
       - image: circleci/postgres:11.2-alpine-postgis
         # 環境情報を追加
         environment:
@@ -15,6 +14,16 @@ jobs:
     working_directory: ~/ec2_test
     steps:
       - checkout
+
+      - run:
+          name: setup bundler
+          command: |
+            sudo gem update --system
+            sudo gem uninstall bundler
+            sudo rm /usr/local/bin/bundle
+            sudo rm /usr/local/bin/bundler
+            sudo gem install bundler
+
 
       # Restore bundle cache
       - restore_cache:
