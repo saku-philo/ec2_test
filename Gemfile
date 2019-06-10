@@ -51,9 +51,11 @@ group :development, :test do
   gem 'capistrano-rails'
   gem 'capistrano-rbenv'
   gem 'capistrano3-unicorn'
-  gem 'rspec-rails'
   gem 'factory_bot_rails'
+  gem 'rspec-rails'
   gem 'rspec_junit_formatter'
+  gem 'rubocop'
+  gem 'rubocop-rspec'
 end
 
 group :development do

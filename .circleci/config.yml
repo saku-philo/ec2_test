@@ -50,6 +50,10 @@ jobs:
       # run tests!
       # RSpecの実行も修正
       - run:
+          name: rubocop
+          command: bundle exec rubocop
+          
+      - run:
           name: run tests
           command: |
             mkdir /tmp/test-results
