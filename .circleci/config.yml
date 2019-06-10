@@ -4,6 +4,7 @@ jobs:
     docker:
       - image: circleci/ruby:2.5.5-node-browsers
         environment:
+          BUNDLER_VERSION: 2.0.1
           PGHOST: localhost
           PGUSER: ec2_test
           RAILS_ENV: test
