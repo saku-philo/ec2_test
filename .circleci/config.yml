@@ -13,7 +13,7 @@ jobs:
           POSTGRES_USER: ec2_test
           POSTGRES_DB: ec2_test_test
           POSTGRES_PASSWORD: ""
-    # ディレクトリ情報を移動（こうしないとエラーになる）
+    # ディレクトリ情報を移動（こうしないとエラーになる?）
     working_directory: ~/ec2_test
     steps:
       - checkout
