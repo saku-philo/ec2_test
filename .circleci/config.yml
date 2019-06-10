@@ -4,7 +4,6 @@ jobs:
     docker:
       - image: circleci/ruby:2.5.5-node-browsers
         environment:
-          # BUNDLER_VERSION: 2.0.1
           PGHOST: localhost
           PGUSER: ec2_test
           RAILS_ENV: test
@@ -14,7 +13,8 @@ jobs:
           POSTGRES_USER: ec2_test
           POSTGRES_DB: ec2_test_test
           POSTGRES_PASSWORD: ""
-    # ディレクトリ情報を移動（こうしないとエラーになる?）
+
+    # ディレクトリ情報を移動
     working_directory: ~/ec2_test
     steps:
       - checkout
@@ -27,14 +27,6 @@ jobs:
             source $BASH_ENV
             gem install bundler
 
-      # - run:
-      #     name: setup bundler
-      #     command: |
-      #       sudo gem update --system
-      #       sudo gem uninstall bundler
-      #       sudo rm /usr/local/bin/bundle
-      #       sudo gem install bundler
-
       # Restore bundle cache
       - restore_cache:
           keys:
@@ -42,11 +34,7 @@ jobs:
             - rails-demo-bundle-v2-
 
       # Bundle install dependencies
-      - run: bundle install --path vendor/bundle
-
-      # - run: # Install Ruby dependencies
-      #     name: Bundle Install
-      #     command: bundle check || bundle install
+      - run: bundle install --path vendor/bundlel
 
       # Store bundle cache
       - save_cache:
@@ -55,7 +43,6 @@ jobs:
             - vendor/bundle
 
       # Database setup
-      # DBのセットアップを修正
       - run:
           name: Database setup
           command: |
@@ -63,7 +50,7 @@ jobs:
             bundle exec rake db:migrate
 
       # run tests!
-      # RSpecの実行も修正
+      # rubocop実行
       - run:
           name: rubocop
           command: bundle exec rubocop
@@ -74,15 +61,11 @@ jobs:
             mkdir /tmp/test_results
             TEST_FILES="$(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)"
 
-            # ./cc-test-reporter before-build
-
             bundle exec rspec --format progress \
                             --format RspecJunitFormatter \
                             --out /tmp/test-results/rspec.xml \
                             --format progress \
                             "${TEST_FILES}"
-
-            # ./cc-test-reporter after-build --coverage-input-type simplecov --exit-code $?
 
       # Save test results for timing analysis
       - store_test_results:
