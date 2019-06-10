@@ -8,8 +8,8 @@ jobs:
       - image: circleci/postgres:11.2-alpine-postgis
         # 環境情報を追加
         environment:
-        - POSTGRES_USER=ubuntu
-        - POSTGRES_DB=myapp_test
+        - POSTGRES_USER: ec2_test
+        - POSTGRES_DB: ec2_test_test
     # ディレクトリ情報を移動（こうしないとエラーになる）
     working_directory: ~/ec2_test
     steps:
@@ -43,8 +43,6 @@ jobs:
           command: |
             bundle exec rake db:create db:schema:load --trace
             bundle exec rake db:migrate
-          environment:
-            DATABASE_URL: "postgres://ubuntu@localhost:5432/myapp_test"
 
       # run tests!
       # RSpecの実行も修正
@@ -53,14 +51,20 @@ jobs:
           command: |
             mkdir /tmp/test-results
             TEST_FILES="$(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)"
+
+            ./cc-test-reporter before-build
+
             bundle exec rspec --format progress \
                             --format RspecJunitFormatter \
                             --out /tmp/test-results/rspec.xml \
                             --format progress \
                             "${TEST_FILES}"
-          environment:
-            DATABASE_URL: "postgres://ubuntu@localhost:5432/myapp_test"
+
+            ./cc-test-reporter after-build --coverage-input-type simplecov --exit-code $?
 
       # Save test results for timing analysis
       - store_test_results:
-          path: test_results
+          path: /tmp/test_results
+      - store_artifacts:
+          path: /tmp/test-results
+          destination: test-results
