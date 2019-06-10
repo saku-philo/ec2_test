@@ -4,12 +4,15 @@ jobs:
     docker:
       - image: circleci/ruby:2.5.5-node-browsers
         environment:
+          PGHOST: localhost
+          PGUSER: ec2_test
           RAILS_ENV: test
       - image: circleci/postgres:11.2-alpine-postgis
         # 環境情報を追加
         environment:
-        - POSTGRES_USER: ec2_test
-        - POSTGRES_DB: ec2_test_test
+          POSTGRES_USER: ec2_test
+          POSTGRES_DB: ec2_test_test
+          POSTGRES_PASSWORD: ""
     # ディレクトリ情報を移動（こうしないとエラーになる）
     working_directory: ~/ec2_test
     steps:
