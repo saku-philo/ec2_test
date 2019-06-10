@@ -19,23 +19,33 @@ jobs:
       - checkout
 
       - run:
-          name: setup bundler
-          command: |
-            sudo gem update --system
-            sudo gem uninstall bundler
-            sudo rm /usr/local/bin/bundle
-            sudo gem install bundler
+          name: Which bundler?
+          command: bundle -v
+
+      # - run:
+      #     name: setup bundler
+      #     command: |
+      #       sudo gem update --system
+      #       sudo gem uninstall bundler
+      #       sudo rm /usr/local/bin/bundle
+      #       sudo gem install bundler
 
       # Restore bundle cache
       - restore_cache:
-          key: rails-demo-{{ checksum "Gemfile.lock" }}
+          keys:
+            - rails-demo-bundle-v2-{{ checksum "Gemfile.lock" }}
+            - rails-demo-bundle-v2-
 
       # Bundle install dependencies
       - run: bundle install --path vendor/bundle
 
+      - run: # Install Ruby dependencies
+          name: Bundle Install
+          command: bundle check || bundle install
+
       # Store bundle cache
       - save_cache:
-          key: rails-demo-{{ checksum "Gemfile.lock" }}
+          key: rails-demo-bundle-v2-{{ checksum "Gemfile.lock" }}
           paths:
             - vendor/bundle
 
