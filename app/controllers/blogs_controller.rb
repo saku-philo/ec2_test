@@ -9,7 +9,8 @@ class BlogsController < ApplicationController
 
   # GET /blogs/1
   # GET /blogs/1.json
-  def show; end
+  def show
+  end
 
   # GET /blogs/new
   def new
